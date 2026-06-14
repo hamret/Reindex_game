@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reindex - Prologue</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <canvas id="dust-layer"></canvas>
+
+  <div id="app" class="prologue-app">
+    <div class="app-frame"></div>
+    <div class="app-noise"></div>
+
+    <section class="screen active prologue-screen">
+      <div class="top-status">
+        <span class="status-pill">
+          <span class="status-dot"></span>
+          Narrative Archive / Prologue
+        </span>
+        <span class="status-mini">Text Sequence Loaded</span>
+      </div>
+
+      <div class="prologue-container">
+        <div class="prologue-label">RECONSTRUCTION LOG / OPENING SEQUENCE</div>
+
+        <div id="prologue-story" class="prologue-text">
+          <!-- JS에서 텍스트 출력 -->
+        </div>
+
+        <div class="prologue-controls">
+          <button id="btn-prologue-skip" class="btn ghost">전체 표시</button>
+          <button id="btn-prologue-next" class="btn primary" disabled>다음으로</button>
+        </div>
+      </div>
+
+      <footer class="status-bar">
+        <span>Reindex Institute · Internal Reconstruction Terminal</span>
+        <span>Prologue Sequence</span>
+      </footer>
+    </section>
+  </div>
+
+  <script src="/js/prologue.js"></script>
+</body>
+</html>
