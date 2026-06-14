@@ -141,6 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputApiKey = document.getElementById("input-api-key");
   const labelApiStatus = document.getElementById("label-api-status");
   const btnQuitConfirm = document.getElementById("btn-quit-confirm");
+  const params = new URLSearchParams(window.location.search);
+const initialScreen = params.get("screen");
+
+if (initialScreen === "play") {
+  showScreen("screen-play");
+  if (window.startInstituteTerminal) {
+    window.startInstituteTerminal();
+  }
+}
 
   function refreshApiStatus() {
     const key = localStorage.getItem(STORAGE_KEY);

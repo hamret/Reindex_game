@@ -119,9 +119,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function goNext() {
-    window.location.href = "/chapter/1";
-  }
+function goNext() {
+  window.location.href = "/?screen=play";
+}
 
   function finishAll() {
     isTyping = false;
