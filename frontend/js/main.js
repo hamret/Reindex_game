@@ -128,103 +128,30 @@ document.addEventListener("DOMContentLoaded", () => {
   initDustBackground();
   checkBackendHealth();
 
-  const fadeLayer = document.getElementById("screen-fade");
   const STORAGE_KEY = "reindex_groq_api_key";
 
-  function playFadeAndShow(targetId) {
-    if (!fadeLayer) {
-      showScreen(targetId);
-      return;
-    }
+  const btnPlay = document.getElementById("btn-play");
+  const btnEnterFullscreen = document.getElementById("btn-enter-fullscreen");
+  const btnSkipFullscreen = document.getElementById("btn-skip-fullscreen");
+  const btnOpenApiSettings = document.getElementById("btn-open-api-settings");
+  const btnDevPlay = document.getElementById("btn-dev-play");
+  const btnCloseApiWarning = document.getElementById("btn-close-api-warning");
+  const btnSaveApiKey = document.getElementById("btn-save-api-key");
+  const btnClearApiKey = document.getElementById("btn-clear-api-key");
+  const inputApiKey = document.getElementById("input-api-key");
+  const labelApiStatus = document.getElementById("label-api-status");
+  const btnQuitConfirm = document.getElementById("btn-quit-confirm");
 
-    fadeLayer.classList.add("visible");
-
-    setTimeout(() => {
-      showScreen(targetId);
-
-      setTimeout(() => {
-        fadeLayer.classList.remove("visible");
-      }, 260);
-    }, 260);
-  }
-
-  const terminalEl = document.getElementById("terminal-lines");
-  const terminalScript = [
-    "REINDEX INSTITUTE // Cognitive Archive Interface",
-    "Boot sequence: OK",
-    "Node ID: R-01 / Workstation ONLINE",
-    "Operator link: VERIFIED",
-    "",
-    "Loading reconstruction index...",
-    "  › Case registry: FOUND",
-    "  › Memory shards: PENDING CLASSIFICATION",
-    "",
-    "Awaiting first reconstruction request from operator."
-  ];
-
-  let termLineIndex = 0;
-  let termCharIndex = 0;
-  let termStarted = false;
-  let termTimer = null;
-
-  function typeNextTerminalChar() {
-    if (!terminalEl) return;
-
-    if (termLineIndex >= terminalScript.length) {
-      const caret = document.createElement("span");
-      caret.className = "crt-caret";
-      terminalEl.appendChild(caret);
-      return;
-    }
-
-    const currentLine = terminalScript[termLineIndex];
-
-    if (termCharIndex === 0) {
-      const lineEl = document.createElement("div");
-      lineEl.className = "crt-line";
-      lineEl.dataset.lineIndex = String(termLineIndex);
-      terminalEl.appendChild(lineEl);
-      terminalEl.scrollTop = terminalEl.scrollHeight;
-    }
-
-    const lineEl = terminalEl.querySelector(
-      `.crt-line[data-line-index="${termLineIndex}"]`
-    );
-    if (!lineEl) return;
-
-    if (termCharIndex < currentLine.length) {
-      lineEl.textContent += currentLine.charAt(termCharIndex);
-      termCharIndex += 1;
-      terminalEl.scrollTop = terminalEl.scrollHeight;
-      termTimer = setTimeout(typeNextTerminalChar, 26);
-    } else {
-      termLineIndex += 1;
-      termCharIndex = 0;
-      termTimer = setTimeout(typeNextTerminalChar, currentLine === "" ? 260 : 120);
+  function refreshApiStatus() {
+    const key = localStorage.getItem(STORAGE_KEY);
+    if (labelApiStatus) {
+      labelApiStatus.textContent =
+        key && key.trim().length > 0 ? "저장된 키 있음" : "저장된 키 없음";
     }
   }
-
-  function startInstituteTerminal() {
-    if (termStarted) return;
-    termStarted = true;
-
-    if (!terminalEl) return;
-    terminalEl.innerHTML = "";
-    termLineIndex = 0;
-    termCharIndex = 0;
-
-    if (termTimer) {
-      clearTimeout(termTimer);
-      termTimer = null;
-    }
-
-    typeNextTerminalChar();
-  }
-
-  window.startInstituteTerminal = startInstituteTerminal;
 
   function startGameFlow() {
-    playFadeAndShow("screen-play");
+    window.location.href = "/prologue";
   }
 
   function handlePlayClick() {
@@ -238,21 +165,23 @@ document.addEventListener("DOMContentLoaded", () => {
     showOverlayById("overlay-api-warning");
   }
 
-  document.querySelectorAll(".menu-item").forEach((button) => {
-    const targetId = button.getAttribute("data-target");
+  if (btnPlay) {
+    btnPlay.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handlePlayClick();
+    });
+  }
 
-    if (targetId === "screen-play") {
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        handlePlayClick();
-      });
-    } else {
-      button.addEventListener("click", () => {
-        if (targetId) {
-          showScreen(targetId);
-        }
-      });
-    }
+  document.querySelectorAll(".menu-item[data-target]").forEach((button) => {
+    if (button.id === "btn-play") return;
+
+    button.addEventListener("click", () => {
+      const targetId = button.getAttribute("data-target");
+      if (targetId) {
+        showScreen(targetId);
+      }
+    });
   });
 
   document
@@ -262,17 +191,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showScreen("screen-main-menu");
       });
     });
-
-  const btnEnterFullscreen = document.getElementById("btn-enter-fullscreen");
-  const btnSkipFullscreen = document.getElementById("btn-skip-fullscreen");
-  const btnOpenApiSettings = document.getElementById("btn-open-api-settings");
-  const btnDevPlay = document.getElementById("btn-dev-play");
-  const btnCloseApiWarning = document.getElementById("btn-close-api-warning");
-  const btnSaveApiKey = document.getElementById("btn-save-api-key");
-  const btnClearApiKey = document.getElementById("btn-clear-api-key");
-  const inputApiKey = document.getElementById("input-api-key");
-  const labelApiStatus = document.getElementById("label-api-status");
-  const btnQuitConfirm = document.getElementById("btn-quit-confirm");
 
   if (btnEnterFullscreen) {
     btnEnterFullscreen.addEventListener("click", () => {
@@ -307,14 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function refreshApiStatus() {
-    const key = localStorage.getItem(STORAGE_KEY);
-    if (labelApiStatus) {
-      labelApiStatus.textContent =
-        key && key.length > 0 ? "저장된 키 있음" : "저장된 키 없음";
-    }
-  }
-
   if (btnSaveApiKey && inputApiKey) {
     btnSaveApiKey.addEventListener("click", () => {
       const value = inputApiKey.value.trim();
@@ -338,8 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  refreshApiStatus();
-
   if (btnQuitConfirm) {
     btnQuitConfirm.addEventListener("click", () => {
       try {
@@ -349,4 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  refreshApiStatus();
 });

@@ -1,16 +1,16 @@
 function initDustBackground() {
-  const oldCanvas = document.getElementById("dust-layer");
-  if (!oldCanvas) return;
+  const canvas = document.getElementById("dust-layer");
+  if (!canvas) return;
 
-  const ctx = oldCanvas.getContext("2d");
+  const ctx = canvas.getContext("2d");
   let width = 0;
   let height = 0;
   const particles = [];
   const particleCount = 160;
 
   function resize() {
-    width = oldCanvas.width = window.innerWidth;
-    height = oldCanvas.height = window.innerHeight;
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
   }
 
   function createParticle() {
@@ -84,14 +84,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         paragraphs = data.paragraphs;
       }
     }
-  } catch {
-    paragraphs = [
-      "프롤로그 데이터를 불러오지 못했습니다. data/story/prologue.json을 확인하세요.",
-    ];
+  } catch (error) {
+    paragraphs = [];
   }
 
   if (paragraphs.length === 0) {
-    paragraphs = ["프롤로그 데이터가 비어 있습니다."];
+    paragraphs = ["프롤로그 데이터를 불러오지 못했습니다. data/story/prologue.json을 확인하세요."];
   }
 
   let paragraphIndex = 0;
@@ -116,6 +114,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       skipBtn.textContent = "현재 문장 즉시 표시";
     } else if (waitingForClick) {
       skipBtn.textContent = "전체 표시";
+    } else {
+      skipBtn.textContent = "전체 표시";
     }
   }
 
@@ -127,6 +127,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     isTyping = false;
     waitingForClick = false;
     isFinished = true;
+    updateButtons();
+  }
+
+  function typeNextChar() {
+    if (!currentP) return;
+
+    const currentText = paragraphs[paragraphIndex];
+    if (charIndex < currentText.length) {
+      currentP.textContent += currentText.charAt(charIndex);
+      charIndex += 1;
+      textEl.scrollTop = textEl.scrollHeight;
+      typingTimer = setTimeout(typeNextChar, 22);
+      return;
+    }
+
+    isTyping = false;
+    waitingForClick = true;
     updateButtons();
   }
 
@@ -156,30 +173,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     currentP.textContent = paragraphs[paragraphIndex];
     textEl.scrollTop = textEl.scrollHeight;
-
     isTyping = false;
     waitingForClick = true;
     updateButtons();
-  }
-
-  function typeNextChar() {
-    if (paragraphIndex >= paragraphs.length) {
-      finishAll();
-      return;
-    }
-
-    const currentText = paragraphs[paragraphIndex];
-
-    if (charIndex < currentText.length) {
-      currentP.textContent += currentText.charAt(charIndex);
-      charIndex += 1;
-      textEl.scrollTop = textEl.scrollHeight;
-      typingTimer = setTimeout(typeNextChar, 22);
-    } else {
-      isTyping = false;
-      waitingForClick = true;
-      updateButtons();
-    }
   }
 
   function showAllText() {
@@ -240,6 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   nextBtn.addEventListener("click", (event) => {
     event.stopPropagation();
+
     if (isFinished) {
       goNext();
     }
@@ -258,5 +255,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  updateButtons();
   startParagraph();
 });
