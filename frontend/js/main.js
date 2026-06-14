@@ -130,6 +130,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const STORAGE_KEY = "reindex_groq_api_key";
 
+  const terminalEl = document.getElementById("terminal-lines");
+
+  function formatTerminalLine(line) {
+  if (line.startsWith("mimic:")) {
+    return `> ${line}`;
+  }
+  return line;
+}
+const terminalScript = [
+  "REINDEX INSTITUTE // MIMIC INTERFACE",
+  "Boot sequence: OK",
+  "AI core: mimic",
+  "Node ID: R-01 / Workstation ONLINE",
+  "Operator link: VERIFIED",
+  "",
+  "Loading reconstruction index...",
+  "  > Case registry: FOUND",
+  "  > Memory shards: PENDING CLASSIFICATION",
+  "  > Emotional echo map: UNSTABLE",
+  "",
+  "mimic: 연산자 동기화가 완료되었습니다.",
+  "mimic: 첫 번째 재구성 요청을 기다리고 있습니다."
+];
+
+let termLineIndex = 0;
+let termCharIndex = 0;
+let termTimer = null;
+let caretEl = null;
+
+function ensureCaret() {
+  if (!terminalEl) return;
+
+  if (!caretEl || !caretEl.isConnected) {
+    caretEl = document.createElement("span");
+    caretEl.className = "crt-caret";
+    caretEl.textContent = "_";
+    terminalEl.appendChild(caretEl);
+  }
+
+  terminalEl.scrollTop = terminalEl.scrollHeight;
+}
+
+function typeNextTerminalChar() {
+  if (!terminalEl) return;
+
+  if (termLineIndex >= terminalScript.length) {
+    ensureCaret();
+    return;
+  }
+
+  const currentLine = formatTerminalLine(terminalScript[termLineIndex]);
+
+  if (termCharIndex === 0) {
+    const lineEl = document.createElement("div");
+    lineEl.className = "crt-line";
+    lineEl.dataset.lineIndex = String(termLineIndex);
+    terminalEl.appendChild(lineEl);
+  }
+
+  const lineEl = terminalEl.querySelector(
+    `.crt-line[data-line-index="${termLineIndex}"]`
+  );
+
+  if (!lineEl) return;
+
+  if (caretEl && caretEl.isConnected) {
+    caretEl.remove();
+  }
+
+  if (termCharIndex < currentLine.length) {
+    lineEl.textContent += currentLine.charAt(termCharIndex);
+    termCharIndex += 1;
+    terminalEl.scrollTop = terminalEl.scrollHeight;
+    ensureCaret();
+    termTimer = setTimeout(typeNextTerminalChar, 24);
+    return;
+  }
+
+  termLineIndex += 1;
+  termCharIndex = 0;
+  ensureCaret();
+  termTimer = setTimeout(typeNextTerminalChar, currentLine === "" ? 220 : 100);
+}
+
+function startInstituteTerminal() {
+  if (!terminalEl) return;
+
+  if (termTimer) {
+    clearTimeout(termTimer);
+    termTimer = null;
+  }
+
+  terminalEl.innerHTML = "";
+  termLineIndex = 0;
+  termCharIndex = 0;
+  caretEl = null;
+
+  ensureCaret();
+  typeNextTerminalChar();
+}
+
+window.startInstituteTerminal = startInstituteTerminal;
+
   const btnPlay = document.getElementById("btn-play");
   const btnEnterFullscreen = document.getElementById("btn-enter-fullscreen");
   const btnSkipFullscreen = document.getElementById("btn-skip-fullscreen");
@@ -141,15 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputApiKey = document.getElementById("input-api-key");
   const labelApiStatus = document.getElementById("label-api-status");
   const btnQuitConfirm = document.getElementById("btn-quit-confirm");
-  const params = new URLSearchParams(window.location.search);
-const initialScreen = params.get("screen");
-
-if (initialScreen === "play") {
-  showScreen("screen-play");
-  if (window.startInstituteTerminal) {
-    window.startInstituteTerminal();
-  }
-}
 
   function refreshApiStatus() {
     const key = localStorage.getItem(STORAGE_KEY);
@@ -265,6 +359,13 @@ if (initialScreen === "play") {
         alert("브라우저에서는 탭 또는 창을 직접 닫아 주세요.");
       }
     });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const initialScreen = params.get("screen");
+
+  if (initialScreen === "play") {
+    showScreen("screen-play");
   }
 
   refreshApiStatus();
